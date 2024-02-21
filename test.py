@@ -16,7 +16,7 @@ tr = 25  # mean radiant temperature, [$^{\circ}$C]
 v = 0.3  # average air speed, [m/s]
 rh = 50  # relative humidity, [%]
 activity = "Typing"  # participant's activity description
-garments = ["Sweatpants", "T-shirt", "Shoes or sandals"]
+garments = ["Sweatpants", "T-shirt"]
 
 met = met_typical_tasks[activity]  # activity met, [met]
 icl = sum(
