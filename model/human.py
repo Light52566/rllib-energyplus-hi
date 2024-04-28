@@ -32,6 +32,24 @@ class Human:
         self.k2 = -2.6 # Steepness parameter for the falling side of the probability curve.
         self.T2 = -1.6 # pmv at which the falling side of the curve transitions from high to low probability.
 
+    def calcpmv(self, tdb: float, tr: float, v: float, rh: float) -> float:
+        """
+        Calculate the Predicted Mean Vote (PMV) based on the input variables.
+
+        Parameters:
+        - tdb: Dry bulb air temperature, [°C]
+        - tr: Mean radiant temperature, [°C]
+        - v: Average air speed, [m/s]
+        - rh: Relative humidity, [%]
+
+        Returns:
+        - pmv: Predicted Mean Vote.
+        """
+        vr = v_relative(v=v, met=self.met)
+        clo = clo_dynamic(clo=self.icl, met=self.met)
+        results = pmv_ppd(tdb=tdb, tr=tr, vr=vr, rh=rh, met=self.met, clo=clo, standard="ASHRAE")
+        return results['pmv']
+    
     def temp2pmv(self, min_tdb = 10.0, max_tdb = 40.0, step_tdb = 0.5, tr = 25, v = 0.1, rh =50) -> dict:
         """ Uniformly samples the pmv values varying the temperature
         min_tdb: min dry bulb air temperature, [°C]
@@ -52,7 +70,7 @@ class Human:
     
     def calcprobability(self, pmv: float, ) -> float:
         """
-        Calculate the probability of complaint based on the current temperature.
+        Calculate the probability of complaint based on the current pmv.
 
         Parameters:
         - pmv: Current pmv.
