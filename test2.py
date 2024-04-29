@@ -1,11 +1,6 @@
 
 from rleplus.examples.amphitheater.env import AmphitheaterEnv
 
-from pythermalcomfort.models import pmv, pmv_ppd
-from pythermalcomfort.utilities import v_relative, clo_dynamic
-from pythermalcomfort.utilities import met_typical_tasks
-from pythermalcomfort.utilities import clo_individual_garments
-
 from model.human import Human
 
 import numpy as np
@@ -22,17 +17,27 @@ humans = [Human()]
 # the training variables
 epocs = 1000
 silent = False
+print_every = 100
+no_complaint_threshold = 4
 
 # get initial observation
 obs, _ = env.reset()
 
 #training loop
 for i in range(epocs):
-    print('Epoc:', i)
+    if i % print_every == 0:
+        print('Epoc:', i)
+
     # get the dry bulb air temperature
     tdb = obs[1]
     # get the mean radiant temperature
     tr = obs[1]
+
+    # no complaint counter
+    no_complaint = 0
+
+    # cumulative reward for timestep
+    cum_reward = 0
 
     # iterate over humans
     for human in humans:
@@ -47,6 +52,28 @@ for i in range(epocs):
 
         # check if the human complains
         complaint = rand < prob
+
+        if complaint:
+            cum_reward += -1
+        else:
+            no_complaint += 1
+        
+        if no_complaint == no_complaint_threshold:
+            cum_reward += 1
+            no_complaint = 0
+        
+        if not silent and i % print_every == 0:
+            print('Temp:', tdb, tr, ',PMV:', temp_pmv, ',Prob:', prob, ',Complaint:', complaint, ',Cumulative reward:', cum_reward)
+
+    # step the environment
+    obs, rew, done, _, _ = env.step(25)
+
+env.close()
+print("Done!")
+        
+    
+
+
 
 
 
