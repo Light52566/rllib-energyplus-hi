@@ -12,6 +12,8 @@ from pythermalcomfort.utilities import v_relative, clo_dynamic
 from pythermalcomfort.utilities import met_typical_tasks
 from pythermalcomfort.utilities import clo_individual_garments
 
+from model.human import Human
+
 
 
 class AmphitheaterEnv(EnergyPlusEnv):
@@ -28,7 +30,7 @@ class AmphitheaterEnv(EnergyPlusEnv):
     base_path = Path(__file__).parent
     pmv_dict = {}
 
-    def __init__(self, env_config: Dict[str, Any]):
+    def __init__(self, env_config: Dict[str, Any], nhumans: int = 1):
         super().__init__(env_config)
         self.pmv_dict["v"] = 0.3
         self.pmv_dict["rh"] = 50
@@ -38,6 +40,8 @@ class AmphitheaterEnv(EnergyPlusEnv):
         self.pmv_dict["icl"] = sum([clo_individual_garments[item] for item in self.pmv_dict["garments"]])
         self.pmv_dict["vr"] = v_relative(v=self.pmv_dict["v"], met=self.pmv_dict["met"])
         self.pmv_dict["clo"] = clo_dynamic(clo=self.pmv_dict["icl"], met=self.pmv_dict["met"])
+
+        self.humans = [Human() for _ in range(nhumans)]
 
     @override(EnergyPlusEnv)
     def get_weather_file(self) -> Union[Path, str]:
@@ -92,13 +96,42 @@ class AmphitheaterEnv(EnergyPlusEnv):
 
     @override(EnergyPlusEnv)
     def compute_reward(self, obs: Dict[str, float]) -> float:
-        """A simple reward function that penalizes on thermal comfort."""
-        results = pmv_ppd(
-            tdb=obs["iat"], tr=obs["iat"], vr=self.pmv_dict["vr"], rh=self.pmv_dict["rh"], met=self.pmv_dict["met"], clo=self.pmv_dict["clo"], standard="ASHRAE"
-        )
+        """A reward function that penalizes on human complaints and rewards no complaints."""
+        # results = pmv_ppd(
+        #     tdb=obs["iat"], tr=obs["iat"], vr=self.pmv_dict["vr"], rh=self.pmv_dict["rh"], met=self.pmv_dict["met"], clo=self.pmv_dict["clo"], standard="ASHRAE"
+        # )
+        # no complaint counter and threshold
+        no_complaint = 0
+        no_complaint_threshold = 4
 
-        reward = 1.0 - np.abs(results["pmv"])
-        return reward
+        # cumulative reward for timestep
+        step_cum_reward = 0
+
+        # iterate over humans
+        for human in self.humans:
+            # calculate pmv value for the current human
+            temp_pmv = human.calcpmv(obs["iat"], obs["iat"], self.pmv_dict["vr"], rh=self.pmv_dict["rh"])
+
+            # get probability of complaint
+            prob = human.calcprobability(temp_pmv)
+
+            # generate random number between 0 and 1
+            rand = np.random.rand()
+
+            # check if the human complains
+            complaint = rand < prob
+
+            if complaint:
+                step_cum_reward += -1
+            else:
+                no_complaint += 1
+            
+            if no_complaint == no_complaint_threshold:
+                step_cum_reward += 1
+                no_complaint = 0
+
+        # reward = 1.0 - np.abs(results["pmv"])
+        return step_cum_reward
 
     @override(EnergyPlusEnv)
     def post_process_action(self, action: Union[float, List[float]]) -> Union[float, List[float]]:
