@@ -88,9 +88,18 @@ class BBrightEnv(EnergyPlusEnv):
 
     @override(EnergyPlusEnv)
     def get_actuators(self) -> Dict[str, Tuple[str, str, str]]:
+        actuator_key = 'Room_62b6a475-1bd9-45f0-8eb8-86bc21807113-0005a439'      
+        component_type = 'Zone Temperature Control'
+        cooling_control_type = 'Cooling Setpoint'
+        heating_control_type = 'Heating Setpoint'
+        
         return {
             # supply air temperature setpoint (°C)
-            "sat_spt": ("System Node Setpoint", "Temperature Setpoint", "Node 3")
+            # "sat_spt": ("System Node Setpoint", "Temperature Setpoint", "Node 3")
+            # heating setpoint (°C)
+            "htg_spt": (component_type, heating_control_type, actuator_key),
+            # cooling setpoint (°C)
+            "clg_spt": (component_type, cooling_control_type, actuator_key)
         }
 
     @override(EnergyPlusEnv)
