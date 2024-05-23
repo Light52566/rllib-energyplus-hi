@@ -81,9 +81,9 @@ class BBrightEnv(EnergyPlusEnv):
     def get_meters(self) -> Dict[str, str]:
         return {
             # HVAC elec (J)
-            "elec": "Electricity:HVAC",
+            # "elec": "Electricity:HVAC",
             # District heating (J)
-            "dh": "Heating:DistrictHeatingWater",
+            # "dh": "Heating:DistrictHeatingWater",
         }
 
     @override(EnergyPlusEnv)
