@@ -65,16 +65,16 @@ class BBrightEnv(EnergyPlusEnv):
     @override(EnergyPlusEnv)
     def get_variables(self) -> Dict[str, Tuple[str, str]]:
         return {
-            # °C
-            "oat": ("Site Outdoor Air DryBulb Temperature", "Environment"),
-            # °C
-            "iat": ("Zone Mean Air Temperature", "TZ_Amphitheater"),
-            # ppm
-            "co2": ("Zone Air CO2 Concentration", "TZ_Amphitheater"),
-            # heating setpoint (°C)
-            "htg_spt": ("Schedule Value", "HTG HVAC 1 ADJUSTED BY 1.1 F"),
-            # cooling setpoint (°C)
-            "clg_spt": ("Schedule Value", "CLG HVAC 1 ADJUSTED BY 0 F"),
+            # # °C
+            # "oat": ("Site Outdoor Air DryBulb Temperature", "Environment"),
+            # # °C
+            # "iat": ("Zone Mean Air Temperature", "TZ_Amphitheater"),
+            # # ppm
+            # "co2": ("Zone Air CO2 Concentration", "TZ_Amphitheater"),
+            # # heating setpoint (°C)
+            # "htg_spt": ("Schedule Value", "HTG HVAC 1 ADJUSTED BY 1.1 F"),
+            # # cooling setpoint (°C)
+            # "clg_spt": ("Schedule Value", "CLG HVAC 1 ADJUSTED BY 0 F"),    
         }
 
     @override(EnergyPlusEnv)
