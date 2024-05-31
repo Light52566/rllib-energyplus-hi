@@ -169,12 +169,43 @@ class EnergyPlusRunner:
         """EnergyPlus callback that collects output variables/meters values and enqueue them."""
         if self.simulation_complete or not self._init_callback(state_argument):
             return
-
+        
+        dt = self.get_time(state_argument)
         self.next_obs = {
             **{key: self.x.get_variable_value(state_argument, handle) for key, handle in self.var_handles.items()},
             **{key: self.x.get_meter_value(state_argument, handle) for key, handle in self.meter_handles.items()},
+            "datetime": dt,
         }
         self.obs_queue.put(self.next_obs)
+
+    def get_time(self, state_argument):
+        """
+        This function retrieves the date and time of the simulation timestep in EnergyPlus.
+        Args:
+            state_argument (object): The state object representing the current simulation timestep.
+        Returns:
+            datetime: A datetime object representing the date and time of the simulation timestep.
+        """
+        import datetime
+ 
+        # timedelta = datetime.timedelta()
+        month = self.x.month(state_argument)
+        day = self.x.day_of_month(state_argument)
+        hour = self.x.hour(state_argument)
+        minute = self.x.minutes(state_argument)
+        if hour >= 24.0:
+            hour = 23.0
+            # timedelta += datetime.timedelta(hours=1)
+        if minute >= 60.0:
+            minute = 59
+            # timedelta += datetime.timedelta(minutes=1)
+        dt = datetime.datetime(year=2022, month=month,
+                               day=day, hour=hour, minute=minute)
+ 
+ 
+        # self.ep_data['ep_simulation_control']['num_timesteps'])
+ 
+        return dt
 
     def _send_actions(self, state_argument):
         """EnergyPlus callback that sets actuator value from last decided action."""
@@ -206,7 +237,11 @@ class EnergyPlusRunner:
         self.last_action = next_action
 
         self.x.set_actuator_value(
-            state=state_argument, actuator_handle=self.actuator_handles["sat_spt"], actuator_value=next_action
+            state=state_argument, actuator_handle=self.actuator_handles["htg_spt"], actuator_value=next_action
+        )
+
+        self.x.set_actuator_value(
+            state=state_argument, actuator_handle=self.actuator_handles["clg_spt"], actuator_value=(next_action+1)
         )
 
     def _init_callback(self, state_argument) -> bool:
@@ -381,7 +416,10 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
             obs = self.last_obs
         else:
             # post-process action
-            action_to_apply = self.post_process_action(action)
+            # action_to_apply = self.post_process_action(action)
+            # do not post-process action
+            action_to_apply = action
+
             # Enqueue action (sent to EnergyPlus through dedicated callback)
             # then wait to get next observation.
             # Timeout is set to 2s to handle end of simulation cases, which happens async

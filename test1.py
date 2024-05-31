@@ -29,23 +29,24 @@ vr = v_relative(v=v, met=met)
 clo = clo_dynamic(clo=icl, met=met)
 
 obs, _ = env.reset()
-# print(obs)
+print(obs)
 pmvs = []
 rewards = []
 # calculate PMV in accordance with the ASHRAE 55 2020
 # results = pmv_ppd(tdb=tdb, tr=tr, vr=vr, rh=rh, met=met, clo=clo, standard="ASHRAE")
 # pmvs.append(results['pmv'])
-'''
-for i in range(2):
-    obs, rew, done, _, _ = env.step(25)
+
+for i in range(12):
+    obs, rew, done, _, _ = env.step(24.0)
     # results = pmv_ppd(tdb=obs[1], tr=obs[1], vr=vr, rh=rh, met=met, clo=clo, standard="ASHRAE")
     # pmvs.append(results['pmv'])
     # rewards.append(rew)
+    print(obs, rew, done)
     if done:
         break
 print(obs, rew, done)
-print('indoor tempt:', obs[1])
-print('Mean pmv:', np.array(pmvs).mean())
-print('Mean reward:', np.array(rewards).mean())
-'''
+print('indoor tempt:', obs[0])
+#print('Mean pmv:', np.array(pmvs).mean())
+#print('Mean reward:', np.array(rewards).mean())
+
 env.close()

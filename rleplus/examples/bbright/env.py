@@ -64,6 +64,9 @@ class BBrightEnv(EnergyPlusEnv):
 
     @override(EnergyPlusEnv)
     def get_variables(self) -> Dict[str, Tuple[str, str]]:
+        room_name = "Room_62b6a475-1bd9-45f0-8eb8-86bc21807113-0005a439"
+
+
         return {
             # # °C
             # "oat": ("Site Outdoor Air DryBulb Temperature", "Environment"),
@@ -74,7 +77,17 @@ class BBrightEnv(EnergyPlusEnv):
             # # heating setpoint (°C)
             # "htg_spt": ("Schedule Value", "HTG HVAC 1 ADJUSTED BY 1.1 F"),
             # # cooling setpoint (°C)
-            # "clg_spt": ("Schedule Value", "CLG HVAC 1 ADJUSTED BY 0 F"),    
+            # "clg_spt": ("Schedule Value", "CLG HVAC 1 ADJUSTED BY 0 F"),
+
+            # °C
+            "zma": ("Zone Mean Air Temperature", room_name),
+            # °C 
+            "zhs": ("Zone Thermostat Heating Setpoint Temperature", room_name),
+            # °C
+            "zcs": ("Zone Thermostat Cooling Setpoint Temperature", room_name),
+            # °C
+            "sot": ("Site Outdoor Air Drybulb Temperature", u"Environment"),
+             
         }
 
     @override(EnergyPlusEnv)
@@ -116,6 +129,7 @@ class BBrightEnv(EnergyPlusEnv):
         step_cum_reward = 0
 
         # iterate over humans
+        '''
         for human in self.humans:
             # calculate pmv value for the current human
             temp_pmv = human.calcpmv(obs["iat"], obs["iat"], self.pmv_dict["vr"], rh=self.pmv_dict["rh"])
@@ -140,6 +154,8 @@ class BBrightEnv(EnergyPlusEnv):
 
         # reward = 1.0 - np.abs(results["pmv"])
         return step_cum_reward
+        '''
+        return 0
 
     @override(EnergyPlusEnv)
     def post_process_action(self, action: Union[float, List[float]]) -> Union[float, List[float]]:
