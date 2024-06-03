@@ -66,28 +66,29 @@ class BBrightEnv(EnergyPlusEnv):
     def get_variables(self) -> Dict[str, Tuple[str, str]]:
         room_name = "Room_62b6a475-1bd9-45f0-8eb8-86bc21807113-0005a439"
 
-
         return {
-            # # °C
-            # "oat": ("Site Outdoor Air DryBulb Temperature", "Environment"),
-            # # °C
-            # "iat": ("Zone Mean Air Temperature", "TZ_Amphitheater"),
-            # # ppm
-            # "co2": ("Zone Air CO2 Concentration", "TZ_Amphitheater"),
-            # # heating setpoint (°C)
-            # "htg_spt": ("Schedule Value", "HTG HVAC 1 ADJUSTED BY 1.1 F"),
-            # # cooling setpoint (°C)
-            # "clg_spt": ("Schedule Value", "CLG HVAC 1 ADJUSTED BY 0 F"),
-
             # °C
-            "zma": ("Zone Mean Air Temperature", room_name),
+            "out_tmp": ("Site Outdoor Air Drybulb Temperature", u"Environment"),
+            # °C
+            "air_tmp": ("Zone Mean Air Temperature", room_name),
+            # °C
+            "opr_tmp": ("Zone Operative Temperature", room_name),
+            # %
+            "air_hum": ("Zone Air Relative Humidity", room_name),
             # °C 
-            "zhs": ("Zone Thermostat Heating Setpoint Temperature", room_name),
+            "htg_stp": ("Zone Thermostat Heating Setpoint Temperature", room_name),
             # °C
-            "zcs": ("Zone Thermostat Cooling Setpoint Temperature", room_name),
+            "clg_stp": ("Zone Thermostat Cooling Setpoint Temperature", room_name),
+            # always 0 so not worth reading
+            # "ppl_cnt": ("Zone People Occupant Count", room_name),
+            # causes error, not readable
+            # "slr_rad": ("Zone Windows Total Transmitted Solar Radiation Rate", room_name),
+            # 
+            "eeq_htg": ("Zone Electric Equipment Total Heating Rate", room_name),
+            # 
+            "air_chg": ("Zone Infiltration Air Change Rate", room_name),
             # °C
-            "sot": ("Site Outdoor Air Drybulb Temperature", u"Environment"),
-             
+            "rad_tmp": ("Zone Mean Radiant Temperature", room_name),  
         }
 
     @override(EnergyPlusEnv)

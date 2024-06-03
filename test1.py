@@ -29,24 +29,38 @@ vr = v_relative(v=v, met=met)
 clo = clo_dynamic(clo=icl, met=met)
 
 obs, _ = env.reset()
-print(obs)
+# print(obs)
 pmvs = []
 rewards = []
-# calculate PMV in accordance with the ASHRAE 55 2020
-# results = pmv_ppd(tdb=tdb, tr=tr, vr=vr, rh=rh, met=met, clo=clo, standard="ASHRAE")
-# pmvs.append(results['pmv'])
+
+#get the variables from the environment
+var_dict = env.get_variables()
+var_keys = var_dict.keys()
+# create a dict with keys from variable keys and empty arrays for the observations
+obs_dict = {key: [] for key in var_keys}
 
 for i in range(12):
     obs, rew, done, _, _ = env.step(24.0)
-    # results = pmv_ppd(tdb=obs[1], tr=obs[1], vr=vr, rh=rh, met=met, clo=clo, standard="ASHRAE")
-    # pmvs.append(results['pmv'])
-    # rewards.append(rew)
-    print(obs, rew, done)
+    # append the observations to the dict
+    for key, val in zip(var_keys, obs):
+        obs_dict[key].append(val)
+    # collect rewards
+    rewards.append(rew)
+    # calculate and collect the PMV index
+    _pmv = pmv(tdb=obs_dict["air_tmp"][-1], tr=obs_dict["rad_tmp"][-1], vr=vr, rh=obs_dict["air_hum"][-1], met=met, clo=clo)
+    pmvs.append(_pmv)
+    # print the datetime
+    print(obs[-1])
+    
     if done:
         break
-print(obs, rew, done)
-print('indoor tempt:', obs[0])
-#print('Mean pmv:', np.array(pmvs).mean())
-#print('Mean reward:', np.array(rewards).mean())
+# print(obs, rew, done)
+# print the observations
+for key, val in obs_dict.items():
+    print(key, val)
+# print the rewards
+print(rewards)
+# print the PMV index
+print(pmvs)
 
 env.close()
