@@ -170,11 +170,9 @@ class EnergyPlusRunner:
         if self.simulation_complete or not self._init_callback(state_argument):
             return
         
-        dt = self.get_time(state_argument)
         self.next_obs = {
             **{key: self.x.get_variable_value(state_argument, handle) for key, handle in self.var_handles.items()},
             **{key: self.x.get_meter_value(state_argument, handle) for key, handle in self.meter_handles.items()},
-            "datetime": dt,
         }
         self.obs_queue.put(self.next_obs)
 

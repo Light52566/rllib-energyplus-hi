@@ -50,9 +50,9 @@ class BBrightEnv(EnergyPlusEnv):
     @override(EnergyPlusEnv)
     def get_observation_space(self) -> gym.Space:
         # observation space:
-        # OAT, IAT, CO2, cooling setpoint, heating setpoint, fans elec, district heating
-        low_obs = np.array([-40.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        hig_obs = np.array([40.0, 40.0, 1e5, 30.0, 30.0, 1e8, 1e8])
+        # out_tmp, air_tmp, opr_tmp, air_hum, htg_stp, clg_stp, eeq_htg, air_chg, rad_tmp
+        low_obs = np.array([-40.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1e8, 0.0, 0.0])
+        hig_obs = np.array([40.0, 40.0, 40.0, 100.0, 40.0, 40.0, 1e8, 10.0, 40.0])
         return gym.spaces.Box(low=low_obs, high=hig_obs, dtype=np.float32)
 
     @override(EnergyPlusEnv)
