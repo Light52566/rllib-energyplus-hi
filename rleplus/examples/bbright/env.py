@@ -9,10 +9,6 @@ from rleplus.env.utils import override
 
 from pythermalcomfort.models import pmv, pmv_ppd
 
-from pythermalcomfort.utilities import v_relative, clo_dynamic
-from pythermalcomfort.utilities import met_typical_tasks
-from pythermalcomfort.utilities import clo_individual_garments
-
 from model.human import Human
 
 
@@ -57,7 +53,7 @@ class BBrightEnv(EnergyPlusEnv):
 
     @override(EnergyPlusEnv)
     def get_action_space(self) -> gym.Space:
-        return gym.spaces.Discrete(100)
+        return gym.spaces.Box(low=0, high=40, shape=(1,), dtype=np.float32)
 
     @override(EnergyPlusEnv)
     def get_variables(self) -> Dict[str, Tuple[str, str]]:
@@ -123,7 +119,12 @@ class BBrightEnv(EnergyPlusEnv):
             # calculate the pmv value
             _pmv = pmv(tdb=obs["air_tmp"], tr=obs["rad_tmp"], vr=self.pmv_dict["vr"], rh=obs["air_hum"], met=self.pmv_dict["met"], clo=self.pmv_dict["clo"])
             # return negative distance of pmv from 0
-            return -1*abs(_pmv)
+            reward = -1*abs(_pmv)
+            # if reward is nan, return -4
+            if np.isnan(reward):
+                return -4
+            else:
+                return reward
         elif self.reward_type == "human":
             # no complaint counter and threshold
             no_complaint = 0
@@ -163,11 +164,11 @@ class BBrightEnv(EnergyPlusEnv):
 
     @override(EnergyPlusEnv)
     def post_process_action(self, action: Union[float, List[float]]) -> Union[float, List[float]]:
-        actual_range = (15.0, 30.0)
+        actual_range = (0.0, 40.0)
 
         return self._rescale(
-            n=int(action), range1=(self.action_space.start, self.action_space.n), range2=actual_range  # noqa  # noqa
-        )
+            n=float(action), range1=(self.action_space.low, self.action_space.high), range2=actual_range  # noqa  # noqa
+        ) [0] # indexed to get the value from numpy array
 
     def _rescale(self, n: int, range1: Tuple[float, float], range2: Tuple[float, float]) -> float:
         delta1 = range1[1] - range1[0]

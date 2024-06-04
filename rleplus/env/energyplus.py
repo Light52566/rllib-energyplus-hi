@@ -239,7 +239,7 @@ class EnergyPlusRunner:
         )
 
         self.x.set_actuator_value(
-            state=state_argument, actuator_handle=self.actuator_handles["clg_spt"], actuator_value=(next_action+1)
+            state=state_argument, actuator_handle=self.actuator_handles["clg_spt"], actuator_value=(next_action+1.0)
         )
 
     def _init_callback(self, state_argument) -> bool:
@@ -419,9 +419,9 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
             obs = self.last_obs
         else:
             # post-process action
-            # action_to_apply = self.post_process_action(action)
+            action_to_apply = self.post_process_action(action)
             # do not post-process action
-            action_to_apply = action
+            # action_to_apply = action
 
             # Enqueue action (sent to EnergyPlus through dedicated callback)
             # then wait to get next observation.
