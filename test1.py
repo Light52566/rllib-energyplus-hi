@@ -55,8 +55,8 @@ for i in range(12):
 for key, val in obs_dict.items():
     print(key, val)
 # print the rewards
-print(rewards)
+print("rewards: ", rewards)
 # print the PMV index
-print(pmvs)
+print("pmvs: ", pmvs)
 
 env.close()

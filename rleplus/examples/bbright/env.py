@@ -7,6 +7,8 @@ import numpy as np
 from rleplus.env.energyplus import EnergyPlusEnv
 from rleplus.env.utils import override
 
+from pythermalcomfort.models import pmv, pmv_ppd
+
 from pythermalcomfort.utilities import v_relative, clo_dynamic
 from pythermalcomfort.utilities import met_typical_tasks
 from pythermalcomfort.utilities import clo_individual_garments
@@ -31,14 +33,9 @@ class BBrightEnv(EnergyPlusEnv):
 
     def __init__(self, env_config: Dict[str, Any], nhumans: int = 1):
         super().__init__(env_config)
-        self.pmv_dict["v"] = 0.3
-        self.pmv_dict["rh"] = 50
-        self.pmv_dict["activity"] = "Typing"
-        # self.pmv_dict["garments"] = ["Sweatpants", "T-shirt"]
-        self.pmv_dict["met"] = met_typical_tasks[self.pmv_dict["activity"]]
-        # self.pmv_dict["icl"] = sum([clo_individual_garments[item] for item in self.pmv_dict["garments"]])
-        self.pmv_dict["vr"] = v_relative(v=self.pmv_dict["v"], met=self.pmv_dict["met"])
-        # self.pmv_dict["clo"] = clo_dynamic(clo=self.pmv_dict["icl"], met=self.pmv_dict["met"])
+        self.pmv_dict["met"] = 1.1
+        self.pmv_dict["vr"] = 0.1
+        self.pmv_dict["clo"] = 1.4
 
         self.humans = [Human() for _ in range(nhumans)]
 
@@ -119,9 +116,15 @@ class BBrightEnv(EnergyPlusEnv):
     @override(EnergyPlusEnv)
     def compute_reward(self, obs: Dict[str, float]) -> float:
         """A reward function that penalizes on human complaints and rewards no complaints."""
-        # results = pmv_ppd(
-        #     tdb=obs["iat"], tr=obs["iat"], vr=self.pmv_dict["vr"], rh=self.pmv_dict["rh"], met=self.pmv_dict["met"], clo=self.pmv_dict["clo"], standard="ASHRAE"
-        # )
+
+        if self.reward_type == "zero":
+            return 0.0
+        elif self.reward_type == "pmv":
+            # calculate the pmv value
+            _pmv = pmv(tdb=obs["air_tmp"], tr=obs["rad_tmp"], vr=self.pmv_dict["vr"], rh=obs["air_hum"], met=self.pmv_dict["met"], clo=self.pmv_dict["clo"])
+            # return negative distance of pmv from 0
+            return -1*abs(_pmv)
+
         # no complaint counter and threshold
         no_complaint = 0
         no_complaint_threshold = 4
@@ -156,7 +159,7 @@ class BBrightEnv(EnergyPlusEnv):
         # reward = 1.0 - np.abs(results["pmv"])
         return step_cum_reward
         '''
-        return 0
+        
 
     @override(EnergyPlusEnv)
     def post_process_action(self, action: Union[float, List[float]]) -> Union[float, List[float]]:

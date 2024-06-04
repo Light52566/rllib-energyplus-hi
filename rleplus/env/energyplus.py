@@ -303,7 +303,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
     implement the actual environment.
     """
 
-    def __init__(self, env_config: Dict[str, Any]):
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv"):
         self.spec = gym.envs.registration.EnvSpec(f"{self.__class__.__name__}")
 
         self.env_config = env_config
@@ -319,6 +319,11 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         self.energyplus_runner: Optional[EnergyPlusRunner] = None
         self.obs_queue: Optional[Queue] = None
         self.act_queue: Optional[Queue] = None
+
+        if reward_type in ["pmv", "human", "zero"]:
+            self.reward_type = reward_type
+        else:
+            raise ValueError(f"Invalid reward type: {reward_type}")
 
         self.runner_config = RunnerConfig(
             epw=self.get_weather_file(),
