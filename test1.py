@@ -8,15 +8,12 @@ from pythermalcomfort.utilities import clo_individual_garments
 
 import numpy as np
 
-env = BBrightEnv({"output": "/tmp/tests_output"})
+env = BBrightEnv({"output": "/tmp/tests_output"}, reward_type="human", nhumans=1)
 
 # input variables
 tdb = 27  # dry bulb air temperature, [$^{\circ}$C]
 tr = 25  # mean radiant temperature, [$^{\circ}$C]
-v = 0.3  # average air speed, [m/s]
 rh = 50  # relative humidity, [%]
-activity = "Typing"  # participant's activity description
-garments = ["Sweatpants", "T-shirt"]
 
 vr = 0.1
 met = 1.1

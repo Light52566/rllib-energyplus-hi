@@ -31,8 +31,8 @@ class BBrightEnv(EnergyPlusEnv):
     base_path = Path(__file__).parent
     pmv_dict = {}
 
-    def __init__(self, env_config: Dict[str, Any], nhumans: int = 1):
-        super().__init__(env_config)
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv", nhumans: int = 1):
+        super().__init__(env_config, reward_type=reward_type)
         self.pmv_dict["met"] = 1.1
         self.pmv_dict["vr"] = 0.1
         self.pmv_dict["clo"] = 1.4
@@ -124,41 +124,41 @@ class BBrightEnv(EnergyPlusEnv):
             _pmv = pmv(tdb=obs["air_tmp"], tr=obs["rad_tmp"], vr=self.pmv_dict["vr"], rh=obs["air_hum"], met=self.pmv_dict["met"], clo=self.pmv_dict["clo"])
             # return negative distance of pmv from 0
             return -1*abs(_pmv)
+        elif self.reward_type == "human":
+            # no complaint counter and threshold
+            no_complaint = 0
+            no_complaint_threshold = 4
 
-        # no complaint counter and threshold
-        no_complaint = 0
-        no_complaint_threshold = 4
+            # cumulative reward for timestep
+            step_cum_reward = 0
 
-        # cumulative reward for timestep
-        step_cum_reward = 0
-
-        # iterate over humans
-        '''
-        for human in self.humans:
-            # calculate pmv value for the current human
-            temp_pmv = human.calcpmv(obs["iat"], obs["iat"], self.pmv_dict["vr"], rh=self.pmv_dict["rh"])
-
-            # get probability of complaint
-            prob = human.calcprobability(temp_pmv)
-
-            # generate random number between 0 and 1
-            rand = np.random.rand()
-
-            # check if the human complains
-            complaint = rand < prob
-
-            if complaint:
-                step_cum_reward += -1
-            else:
-                no_complaint += 1
+            # iterate over humans
             
-            if no_complaint == no_complaint_threshold:
-                step_cum_reward += 1
-                no_complaint = 0
+            for human in self.humans:
+                # calculate pmv value for the current human
+                temp_pmv = human.calcpmv(obs["air_tmp"], obs["rad_tmp"], self.pmv_dict["vr"], obs["air_hum"])
 
-        # reward = 1.0 - np.abs(results["pmv"])
-        return step_cum_reward
-        '''
+                # get probability of complaint
+                prob = human.calcprobability(temp_pmv)
+
+                # generate random number between 0 and 1
+                rand = np.random.rand()
+
+                # check if the human complains
+                complaint = rand < prob
+
+                if complaint:
+                    step_cum_reward += -1
+                else:
+                    no_complaint += 1
+                
+                if no_complaint == no_complaint_threshold:
+                    step_cum_reward += 1
+                    no_complaint = 0
+
+            # reward = 1.0 - np.abs(results["pmv"])
+            return step_cum_reward
+            
         
 
     @override(EnergyPlusEnv)
