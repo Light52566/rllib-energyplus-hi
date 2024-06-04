@@ -3,6 +3,10 @@ def env_creator(env_name):
         from .amphitheater.env import AmphitheaterEnv
 
         return AmphitheaterEnv
+    elif env_name == "BBrightEnv":
+        from .bbright.env import BBrightEnv
+
+        return BBrightEnv
     else:
         raise NotImplementedError
 
@@ -16,6 +20,7 @@ def ray_register(env_name):
 
 def register_all():
     try:
+        ray_register("BBrightEnv")
         ray_register("AmphitheaterEnv")
     except ImportError:
         pass
