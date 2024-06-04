@@ -18,15 +18,9 @@ rh = 50  # relative humidity, [%]
 activity = "Typing"  # participant's activity description
 garments = ["Sweatpants", "T-shirt"]
 
-met = met_typical_tasks[activity]  # activity met, [met]
-icl = sum(
-    [clo_individual_garments[item] for item in garments]
-)  # calculate total clothing insulation
-
-# calculate the relative air velocity
-vr = v_relative(v=v, met=met)
-# calculate the dynamic clothing insulation
-clo = clo_dynamic(clo=icl, met=met)
+vr = 0.1
+met = 1.1
+clo = 1.4
 
 obs, _ = env.reset()
 # print(obs)
@@ -39,6 +33,8 @@ var_keys = var_dict.keys()
 # create a dict with keys from variable keys and empty arrays for the observations
 obs_dict = {key: [] for key in var_keys}
 
+print(vr, met, clo)
+
 for i in range(12):
     obs, rew, done, _, _ = env.step(24.0)
     # append the observations to the dict
@@ -50,7 +46,7 @@ for i in range(12):
     _pmv = pmv(tdb=obs_dict["air_tmp"][-1], tr=obs_dict["rad_tmp"][-1], vr=vr, rh=obs_dict["air_hum"][-1], met=met, clo=clo)
     pmvs.append(_pmv)
     # print the datetime
-    print(obs[-1])
+    # print(obs[-1])
     
     if done:
         break
