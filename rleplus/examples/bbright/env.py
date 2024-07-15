@@ -48,7 +48,7 @@ class BBrightEnv(EnergyPlusEnv):
         # observation space:
         # out_tmp, air_tmp, opr_tmp, air_hum, htg_stp, clg_stp, eeq_htg, air_chg, rad_tmp
         low_obs = np.array([-40.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1e8, 0.0, 0.0])
-        hig_obs = np.array([40.0, 40.0, 40.0, 100.0, 39.0, 40.0, 1e8, 10.0, 40.0])
+        hig_obs = np.array([45.0, 45.0, 40.0, 100.0, 40.0, 40.5, 1e8, 10.0, 45.0])
         return gym.spaces.Box(low=low_obs, high=hig_obs, dtype=np.float32)
 
     @override(EnergyPlusEnv)

@@ -6,6 +6,8 @@ from pathlib import Path
 from queue import Empty, Full, Queue
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import pickle as pkl
+
 import gymnasium as gym
 import numpy as np
 
@@ -320,6 +322,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
 
         self.reward_history = []
         self.obs_history = []
+        # self.pmv_history = []
 
         if reward_type in ["pmv", "human", "zero"]:
             self.reward_type = reward_type
@@ -460,7 +463,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         self.obs_history.append(obs)
 
         if done:
-            print('yayyyy',self.reward_history)
+            self.save_history("./tmp/history.pkl")
 
         # print("obs", obs, "reward", reward, "done", done, "action", action)
         obs_vec = np.array(list(obs.values()))
@@ -473,10 +476,15 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
     def render(self, mode="human"):
         pass
 
-    def saveHistory(self, filename):
-        import pandas as pd
+    def save_history(self, filepath):
+        # combine the dicts in obs_history to single dict
+        comb_history = {key: [obs[key] for obs in self.obs_history] for key in self.obs_history[0]}
+        comb_history['reward'] = self.reward_history
 
-        df = pd.DataFrame(self.obs_history)
-        df["reward"] = self.reward_history
-        df.to_csv(filename, index=False)
-        print(f"Saved history to {filename}")
+        # append the combined history to a pickle file
+        with open(filepath, 'ab') as f:
+            pkl.dump(comb_history, f)
+        print(f"History saved to {filepath}")
+
+
+
