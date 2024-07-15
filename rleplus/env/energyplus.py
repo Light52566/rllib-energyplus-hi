@@ -229,7 +229,7 @@ class EnergyPlusRunner:
             self.simulation_complete = True
             return
 
-        assert isinstance(next_action, float)
+        # assert isinstance(next_action, float)
 
         # keep last action to resend it if needed (see above)
         self.last_action = next_action
@@ -239,7 +239,7 @@ class EnergyPlusRunner:
         )
 
         self.x.set_actuator_value(
-            state=state_argument, actuator_handle=self.actuator_handles["clg_spt"], actuator_value=(next_action+1.0)
+            state=state_argument, actuator_handle=self.actuator_handles["clg_spt"], actuator_value=(next_action+0.5)
         )
 
     def _init_callback(self, state_argument) -> bool:
@@ -301,7 +301,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
     implement the actual environment.
     """
 
-    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv"):
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "human"):
         self.spec = gym.envs.registration.EnvSpec(f"{self.__class__.__name__}")
 
         self.env_config = env_config
@@ -317,6 +317,9 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         self.energyplus_runner: Optional[EnergyPlusRunner] = None
         self.obs_queue: Optional[Queue] = None
         self.act_queue: Optional[Queue] = None
+
+        self.reward_history = []
+        self.obs_history = []
 
         if reward_type in ["pmv", "human", "zero"]:
             self.reward_type = reward_type
@@ -383,6 +386,10 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         self.episode += 1
         self.last_obs = self.observation_space.sample()
 
+        # reset history
+        self.reward_history = []
+        self.obs_history = []
+
         if self.energyplus_runner is not None:
             self.energyplus_runner.stop()
 
@@ -448,6 +455,13 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # compute reward
         reward = self.compute_reward(obs)
 
+        # store history
+        self.reward_history.append(reward)
+        self.obs_history.append(obs)
+
+        if done:
+            print('yayyyy',self.reward_history)
+
         # print("obs", obs, "reward", reward, "done", done, "action", action)
         obs_vec = np.array(list(obs.values()))
         return obs_vec, reward, done, False, {}
@@ -458,3 +472,11 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
 
     def render(self, mode="human"):
         pass
+
+    def saveHistory(self, filename):
+        import pandas as pd
+
+        df = pd.DataFrame(self.obs_history)
+        df["reward"] = self.reward_history
+        df.to_csv(filename, index=False)
+        print(f"Saved history to {filename}")

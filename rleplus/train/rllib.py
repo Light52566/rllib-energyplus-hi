@@ -2,10 +2,12 @@
 
 import argparse
 from tempfile import TemporaryDirectory
+from typing import List
 
 import ray
 from ray import air, tune
 from ray.rllib.algorithms.ppo import PPOConfig
+from ray.tune.experiment import Trial
 
 from rleplus.examples.registry import register_all
 
@@ -38,7 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=2,
+        default=1,
         help="The number of workers to use",
     )
     parser.add_argument(
@@ -62,6 +64,10 @@ def parse_args() -> argparse.Namespace:
     print(f"Running with following CLI args: {built_args}")
     return built_args
 
+class CustomCallback(tune.Callback):
+    def on_step_begin(self, iteration: int, trials: List[Trial], **info):
+        return super().on_step_begin(iteration, trials, **info)
+    
 
 def main():
     args = parse_args()
@@ -73,6 +79,7 @@ def main():
     # Ray configuration. See Ray docs for tuning
     config = (
         PPOConfig()
+        # .callbacks(CustomCallback)
         .environment(
             env=args.env,
             env_config=vars(args),
