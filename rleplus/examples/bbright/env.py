@@ -27,7 +27,7 @@ class BBrightEnv(EnergyPlusEnv):
     base_path = Path(__file__).parent
     pmv_dict = {}
 
-    def __init__(self, env_config: Dict[str, Any], reward_type: str = "human", nhumans: int = 1):
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv", nhumans: int = 1):
         super().__init__(env_config, reward_type=reward_type)
         self.pmv_dict["met"] = 1.1
         self.pmv_dict["vr"] = 0.1
@@ -48,7 +48,7 @@ class BBrightEnv(EnergyPlusEnv):
         # observation space:
         # out_tmp, air_tmp, opr_tmp, air_hum, htg_stp, clg_stp, eeq_htg, air_chg, rad_tmp
         low_obs = np.array([-40.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1e8, 0.0, 0.0])
-        hig_obs = np.array([45.0, 45.0, 40.0, 100.0, 40.0, 40.5, 1e8, 10.0, 45.0])
+        hig_obs = np.array([45.0, 45.0, 45.0, 100.0, 40.0, 40.5, 1e8, 10.0, 45.0])
         return gym.spaces.Box(low=low_obs, high=hig_obs, dtype=np.float32)
 
     @override(EnergyPlusEnv)
