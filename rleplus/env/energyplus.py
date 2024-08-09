@@ -11,6 +11,9 @@ import pickle as pkl
 import gymnasium as gym
 import numpy as np
 
+import random
+from datetime import datetime, timedelta
+
 from rleplus.env.utils import try_import_energyplus_api
 
 EnergyPlusAPI, DataExchange, _ = try_import_energyplus_api()
@@ -328,6 +331,9 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
             self.reward_type = reward_type
         else:
             raise ValueError(f"Invalid reward type: {reward_type}")
+    
+        # each day is 96 timesteps (15 minutes)
+        self.episode_length = 96
 
         self.runner_config = RunnerConfig(
             epw=self.get_weather_file(),
@@ -386,6 +392,8 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         return action
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[Dict[str, Any]] = None):
+        print("Episode:", self.episode, " finised at Timestep:", self.timestep)
+        
         self.episode += 1
         self.last_obs = self.observation_space.sample()
 
@@ -401,6 +409,15 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # as only 1 E+ timestep is processed at a time
         self.obs_queue = Queue(maxsize=1)
         self.act_queue = Queue(maxsize=1)
+
+        # Generate random date and set it as the start and end date
+        # start_date = datetime(2022, 1, 1) + timedelta(days=random.randint(0, 364))
+        # end_date = start_date
+
+        # Update runner_config with new dates - gives error :(
+        # self.runner_config['start_date'] = start_date.strftime('%m/%d/%Y')
+        # self.runner_config['end_date'] = end_date.strftime('%m/%d/%Y')
+
 
         self.energyplus_runner = EnergyPlusRunner(
             episode=self.episode,
@@ -455,6 +472,10 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
             else:
                 self.last_obs = obs
 
+            # finish episode if episode_length is reached
+            if self.timestep % self.episode_length == 0:
+                done = True
+
         # compute reward
         reward = self.compute_reward(obs)
 
@@ -484,7 +505,9 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # append the combined history to a pickle file
         with open(filepath, 'ab') as f:
             pkl.dump(comb_history, f)
-        print(f"History saved to {filepath}")
+        print("History saved to", filepath, 
+              "at timestep", self.timestep,
+              "number of timesteps", len(self.reward_history))
 
 
 
