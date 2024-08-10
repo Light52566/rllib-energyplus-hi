@@ -14,6 +14,8 @@ import numpy as np
 import random
 from datetime import datetime, timedelta
 
+from pythermalcomfort.models import pmv
+
 from rleplus.env.utils import try_import_energyplus_api
 
 EnergyPlusAPI, DataExchange, _ = try_import_energyplus_api()
@@ -325,7 +327,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
 
         self.reward_history = []
         self.obs_history = []
-        # self.pmv_history = []
+        self.pmv_history = []
 
         if reward_type in ["pmv", "human", "zero"]:
             self.reward_type = reward_type
@@ -400,6 +402,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # reset history
         self.reward_history = []
         self.obs_history = []
+        self.pmv_history = []
 
         if self.energyplus_runner is not None:
             self.energyplus_runner.stop()
@@ -417,7 +420,6 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # Update runner_config with new dates - gives error :(
         # self.runner_config['start_date'] = start_date.strftime('%m/%d/%Y')
         # self.runner_config['end_date'] = end_date.strftime('%m/%d/%Y')
-
 
         self.energyplus_runner = EnergyPlusRunner(
             episode=self.episode,
@@ -479,9 +481,13 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # compute reward
         reward = self.compute_reward(obs)
 
+        # compute pmv
+        _pmv = pmv(tdb=obs["air_tmp"], tr=obs["rad_tmp"], vr=0.1, rh=obs["air_hum"], met=1.1, clo=1.4)
+
         # store history
         self.reward_history.append(reward)
         self.obs_history.append(obs)
+        self.pmv_history.append(_pmv)
 
         if done:
             self.save_history("./tmp/history.pkl")
@@ -501,6 +507,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # combine the dicts in obs_history to single dict
         comb_history = {key: [obs[key] for obs in self.obs_history] for key in self.obs_history[0]}
         comb_history['reward'] = self.reward_history
+        comb_history['pmv'] = self.pmv_history
 
         # append the combined history to a pickle file
         with open(filepath, 'ab') as f:
