@@ -473,7 +473,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
                 self.last_obs = obs
 
             # finish episode if episode_length is reached
-            if self.timestep % self.episode_length == 0:
+            if self.timestep % self.episode_length == 0 and self.timestep > 0:
                 done = True
 
         # compute reward
@@ -505,9 +505,9 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
         # append the combined history to a pickle file
         with open(filepath, 'ab') as f:
             pkl.dump(comb_history, f)
-        print("History saved to", filepath, 
-              "at timestep", self.timestep,
-              "number of timesteps", len(self.reward_history))
+        # print("History saved to", filepath, 
+        #       "at timestep", self.timestep,
+        #       "number of timesteps", len(self.reward_history))
 
 
 
