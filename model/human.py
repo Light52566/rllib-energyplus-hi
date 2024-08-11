@@ -6,10 +6,11 @@ from pythermalcomfort.utilities import clo_individual_garments
 
 
 class Human:
-    def __init__(self) -> None:
+    def __init__(self, icl:float=1.1, met:float=1.4, 
+                 exp_a:float=1.0, exp_b:float=2.0, exp_c:float=0.9, exp_d:float=2.7) -> None:
         # pmv parameters
-        self.icl = 1.1 # total clothing insulation, [clo]
-        self.met = 1.4  # activity metabolic rate, [met]
+        self.icl = icl # total clothing insulation, [clo]
+        self.met = met  # activity metabolic rate, [met]
 
 
         # interaction parameters
@@ -21,10 +22,10 @@ class Human:
         self.prob_func = "exp" # Probability function to use. Options: "sigmoid", "exp"
 
         # P(pmv) = exp(ax-b) + exp(-cx-d)
-        self.exp_a = 1.0
-        self.exp_b = 2.0
-        self.exp_c = 0.9
-        self.exp_d = 2.7
+        self.exp_a = exp_a
+        self.exp_b = exp_b
+        self.exp_c = exp_c
+        self.exp_d = exp_d
 
         # P(pmv) = 1 / (1 + exp(-k1 * (pmv - T1))) + 1 / (1 + exp(-k2 * (pmv - T2))
         self.k1 = 6.6 # Steepness parameter for the rising side of the probability curve.
