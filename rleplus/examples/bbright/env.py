@@ -27,7 +27,7 @@ class BBrightEnv(EnergyPlusEnv):
     base_path = Path(__file__).parent
     pmv_dict = {}
 
-    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv", nhumans: int = 1):
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "human", nhumans: int = 1):
         super().__init__(env_config, reward_type=reward_type)
         self.pmv_dict["met"] = 1.1
         self.pmv_dict["vr"] = 0.1
