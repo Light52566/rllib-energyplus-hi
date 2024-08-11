@@ -27,13 +27,14 @@ class BBrightEnv(EnergyPlusEnv):
     base_path = Path(__file__).parent
     pmv_dict = {}
 
-    def __init__(self, env_config: Dict[str, Any], reward_type: str = "human", nhumans: int = 1):
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "human", nhumans: int = 10):
         super().__init__(env_config, reward_type=reward_type)
         self.pmv_dict["met"] = 1.1
         self.pmv_dict["vr"] = 0.1
         self.pmv_dict["clo"] = 1.4
 
-        self.humans = [Human() for _ in range(nhumans)]
+        hstep = 0.1
+        self.humans = [Human(b_exp=2.0+hstep*i, d_exp=2.7-hstep*i) for i in range(nhumans)]
 
     @override(EnergyPlusEnv)
     def get_weather_file(self) -> Union[Path, str]:
