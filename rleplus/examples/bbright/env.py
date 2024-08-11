@@ -34,7 +34,7 @@ class BBrightEnv(EnergyPlusEnv):
         self.pmv_dict["clo"] = 1.4
 
         hstep = 0.1
-        self.humans = [Human(b_exp=2.0+hstep*i, d_exp=2.7-hstep*i) for i in range(nhumans)]
+        self.humans = [Human(exp_b=2.0+hstep*i, exp_d=2.7-hstep*i) for i in range(nhumans)]
 
     @override(EnergyPlusEnv)
     def get_weather_file(self) -> Union[Path, str]:
