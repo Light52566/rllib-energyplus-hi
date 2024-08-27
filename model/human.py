@@ -26,6 +26,7 @@ class Human:
         self.exp_b = exp_b
         self.exp_c = exp_c
         self.exp_d = exp_d
+        self.normalizer = 0.1
 
         # P(pmv) = 1 / (1 + exp(-k1 * (pmv - T1))) + 1 / (1 + exp(-k2 * (pmv - T2))
         self.k1 = 6.6 # Steepness parameter for the rising side of the probability curve.
@@ -88,7 +89,7 @@ class Human:
         else:
             probability = 0.0
         # limit  probabilities between 0 and 1
-        probability = max(0.0, min(1.0, probability))
+        probability = max(0.0, min(1.0, self.normalizer * probability))
         
         return probability
     
