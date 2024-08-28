@@ -308,7 +308,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
     implement the actual environment.
     """
 
-    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv"):
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv", w_file: str = 'Train'):
         self.spec = gym.envs.registration.EnvSpec(f"{self.__class__.__name__}")
 
         self.env_config = env_config
@@ -336,6 +336,8 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
     
         # each day is 96 timesteps (15 minutes)
         self.episode_length = 96
+
+        self.w_file = w_file
 
         self.runner_config = RunnerConfig(
             epw=self.get_weather_file(),
