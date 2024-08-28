@@ -308,7 +308,7 @@ class EnergyPlusEnv(gym.Env, metaclass=abc.ABCMeta):
     implement the actual environment.
     """
 
-    def __init__(self, env_config: Dict[str, Any], reward_type: str = "human"):
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv"):
         self.spec = gym.envs.registration.EnvSpec(f"{self.__class__.__name__}")
 
         self.env_config = env_config

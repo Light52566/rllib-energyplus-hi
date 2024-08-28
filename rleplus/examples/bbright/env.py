@@ -27,11 +27,13 @@ class BBrightEnv(EnergyPlusEnv):
     base_path = Path(__file__).parent
     pmv_dict = {}
 
-    def __init__(self, env_config: Dict[str, Any], reward_type: str = "human", nhumans: int = 1):
+    def __init__(self, env_config: Dict[str, Any], reward_type: str = "pmv", nhumans: int = 1, w_file: str  = 'Train'):
         super().__init__(env_config, reward_type=reward_type)
         self.pmv_dict["met"] = 1.1
         self.pmv_dict["vr"] = 0.1
         self.pmv_dict["clo"] = 1.4
+
+        self.w_file = w_file
 
         hstep = 0.1
         # self.humans = [Human(exp_b=2.0+hstep*i, exp_d=2.7-hstep*i) for i in range(nhumans)]
@@ -39,6 +41,10 @@ class BBrightEnv(EnergyPlusEnv):
 
     @override(EnergyPlusEnv)
     def get_weather_file(self) -> Union[Path, str]:
+        if self.w_file == 'Train':
+            return self.base_path / "NLD_Amsterdam.062400_IWEC.epw"
+        elif self.w_file == 'Test':
+            return self.base_path / "NLD_Groningen.062800_IWEC.epw"
         return self.base_path / "NLD_Amsterdam.062400_IWEC.epw"
 
     @override(EnergyPlusEnv)

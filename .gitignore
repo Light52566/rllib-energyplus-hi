@@ -2,3 +2,4 @@ __pycache__/
 .idea/
 
 /tmp/
+/results/human_default_2_years/episodes/
